@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    container_name: sga-winter-camp
+    restart: always
+    ports:
+      - "1212:3000"
+    volumes:
+      - ./db.json:/app/db.json
+    environment:
+      - NODE_ENV=production

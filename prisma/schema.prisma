@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Submission {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Student Profile
+  student_name   String?
+  gender         String?
+  birthday       String? // YYYY-MM-DD
+  phone          String?
+  wechat         String?
+  school         String?
+  grade          String?
+
+  // Student Assessment (Gamified)
+  role_archetype   String? // Sales_Warrior, Tech_Wizard, etc.
+  tech_score       Int?    // 0-100
+  leadership_style String?
+  preferred_track  String? // Content, Service, E-commerce, SaaS
+  
+  // Raw Assessment Answers
+  talent_point     String?
+  crisis_reaction  String?
+  weapon_choice    String?
+  logic_test       String?
+  loot_distribution String?
+  time_commitment  String?
+
+  // Parent Profile (Angel Investor)
+  parent_role      String?
+  parent_age_range String?
+  parent_education String?
+  parent_industry  String?
+  parent_job_level String? // Owner, Executive, Manager, Staff
+  
+  // B-Side / Resource
+  invest_style     String? // VC, PE, Charity
+  resource_tags    String? // JSON string of tags
+  pain_point       String?
+  b_side_score     Int?    // Calculated value 0-100
+  is_hot_lead      Boolean @default(false)
+  success_goal     String?
+
+  // Future Extensions (JSON for flexibility)
+  extra_data       String? // Stores arbitrary JSON data for future winter camp features
+}
