@@ -9,6 +9,11 @@ const getAudioContext = () => {
   return audioContext;
 };
 
+const isWeChat = () => {
+  if (typeof navigator === "undefined") return false;
+  return /MicroMessenger/i.test(navigator.userAgent);
+};
+
 export const unlockAudio = () => {
   const ctx = getAudioContext();
   if (ctx.state === "suspended") ctx.resume();
@@ -18,6 +23,60 @@ export const unlockAudio = () => {
   source.buffer = buffer;
   source.connect(ctx.destination);
   source.start(0);
+};
+
+const robotSpeak = (text: string) => {
+  const ctx = getAudioContext();
+  unlockAudio();
+
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+
+  osc.type = "sawtooth";
+  filter.type = "bandpass";
+  filter.frequency.setValueAtTime(1100, ctx.currentTime);
+  filter.Q.setValueAtTime(6, ctx.currentTime);
+
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+
+  const startAt = Math.max(ctx.currentTime + 0.01, ctx.currentTime);
+  const unit = 0.045;
+  const gap = 0.01;
+  const base = 160;
+  const spread = 520;
+
+  gain.gain.setValueAtTime(0, startAt);
+  osc.frequency.setValueAtTime(base, startAt);
+  osc.start(startAt);
+
+  let t = startAt;
+  for (const ch of Array.from(text)) {
+    const code = ch.codePointAt(0) ?? 0;
+    const isSpace = /\s/.test(ch);
+    const dur = isSpace ? unit * 1.2 : unit;
+
+    if (!isSpace) {
+      const freq = base + (code % spread);
+      osc.frequency.setValueAtTime(freq, t);
+      gain.gain.cancelScheduledValues(t);
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.18, t + 0.006);
+      gain.gain.linearRampToValueAtTime(0.06, t + dur * 0.7);
+      gain.gain.linearRampToValueAtTime(0, t + dur);
+    }
+
+    t += dur + gap;
+  }
+
+  const endAt = t + 0.02;
+  osc.stop(endAt);
+
+  return new Promise<void>((resolve) => {
+    window.setTimeout(resolve, Math.max(0, (endAt - startAt) * 1000));
+  });
 };
 
 export const playBootSound = () => {
@@ -108,7 +167,10 @@ const pickVoice = (voices: SpeechSynthesisVoice[], lang?: string) => {
 
 const speakOnce = async (text: string, lang?: string) => {
   if (typeof window === "undefined") return;
-  if (!("speechSynthesis" in window)) return;
+  if (!("speechSynthesis" in window) || isWeChat()) {
+    await robotSpeak(text);
+    return;
+  }
 
   const synth = window.speechSynthesis;
   if (synth.paused) synth.resume();
