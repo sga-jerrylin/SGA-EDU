@@ -1,21 +1,18 @@
-// Global AudioContext to reuse and unlock on mobile
 let audioContext: AudioContext | null = null;
+let speakQueue: Promise<void> = Promise.resolve();
 
 const getAudioContext = () => {
   if (!audioContext) {
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-    audioContext = new AudioContext();
+    const Ctx = window.AudioContext || (window as any).webkitAudioContext;
+    audioContext = new Ctx();
   }
   return audioContext;
 };
 
-// Explicitly unlock audio context on user interaction (Mobile Safari fix)
 export const unlockAudio = () => {
   const ctx = getAudioContext();
-  if (ctx.state === 'suspended') {
-    ctx.resume();
-  }
-  // Create and play a silent buffer to fully unlock the engine
+  if (ctx.state === "suspended") ctx.resume();
+
   const buffer = ctx.createBuffer(1, 1, 22050);
   const source = ctx.createBufferSource();
   source.buffer = buffer;
@@ -25,9 +22,8 @@ export const unlockAudio = () => {
 
 export const playBootSound = () => {
   const ctx = getAudioContext();
-  unlockAudio(); // Ensure unlocked
-  
-  // Oscillator 1: Low frequency sweep
+  unlockAudio();
+
   const osc1 = ctx.createOscillator();
   const gain1 = ctx.createGain();
   osc1.connect(gain1);
@@ -43,7 +39,6 @@ export const playBootSound = () => {
   osc1.start();
   osc1.stop(ctx.currentTime + 1.5);
 
-  // Oscillator 2: High frequency computer beep
   const osc2 = ctx.createOscillator();
   const gain2 = ctx.createGain();
   osc2.connect(gain2);
@@ -64,8 +59,8 @@ export const playBootSound = () => {
 
 export const playClickSound = () => {
   const ctx = getAudioContext();
-  if (ctx.state === 'suspended') ctx.resume();
-  
+  if (ctx.state === "suspended") ctx.resume();
+
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   
@@ -82,34 +77,77 @@ export const playClickSound = () => {
   osc.stop(ctx.currentTime + 0.1);
 };
 
-export const speak = (text: string) => {
-  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-    // Cancel any current speech
-    window.speechSynthesis.cancel();
+const waitForVoices = (timeoutMs: number) =>
+  new Promise<SpeechSynthesisVoice[]>((resolve) => {
+    const synth = window.speechSynthesis;
+    const existing = synth.getVoices();
+    if (existing.length) return resolve(existing);
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.pitch = 0.9; 
-    utterance.rate = 1.0;
-    utterance.volume = 1;
-    
-    // Try to find a good voice
-    const voices = window.speechSynthesis.getVoices();
-    // Prefer "Google US English" or "Microsoft David" or any male voice
-    const preferredVoice = voices.find(v => 
-      v.name.includes("Google US English") || 
-      v.name.includes("Microsoft David") || 
-      (v.name.includes("English") && v.name.includes("Male"))
-    );
-    
-    if (preferredVoice) utterance.voice = preferredVoice;
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      synth.removeEventListener("voiceschanged", onVoicesChanged);
+      resolve(synth.getVoices());
+    };
 
-    window.speechSynthesis.speak(utterance);
-  }
+    const onVoicesChanged = () => finish();
+    synth.addEventListener("voiceschanged", onVoicesChanged);
+    window.setTimeout(finish, timeoutMs);
+  });
+
+const pickVoice = (voices: SpeechSynthesisVoice[], lang?: string) => {
+  if (!lang) return undefined;
+  const primary = lang.split("-")[0]?.toLowerCase();
+  return (
+    voices.find((v) => v.lang.toLowerCase() === lang.toLowerCase()) ||
+    voices.find((v) => v.lang.toLowerCase().startsWith(`${primary}-`)) ||
+    voices.find((v) => v.lang.toLowerCase().startsWith(primary))
+  );
 };
 
-// Pre-load voices to ensure they are ready on mobile
+const speakOnce = async (text: string, lang?: string) => {
+  if (typeof window === "undefined") return;
+  if (!("speechSynthesis" in window)) return;
+
+  const synth = window.speechSynthesis;
+  if (synth.paused) synth.resume();
+  if (synth.speaking) synth.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.pitch = 0.9;
+  utterance.rate = 1.0;
+  utterance.volume = 1;
+  if (lang) utterance.lang = lang;
+
+  const voices = synth.getVoices();
+  const resolvedVoices = voices.length ? voices : await waitForVoices(1200);
+  const voice = pickVoice(resolvedVoices, lang);
+  if (voice) utterance.voice = voice;
+
+  await new Promise<void>((resolve) => {
+    utterance.onend = () => resolve();
+    utterance.onerror = () => resolve();
+    synth.speak(utterance);
+  });
+};
+
+export const speak = (text: string, lang?: string) => {
+  speakQueue = speakQueue.then(() => speakOnce(text, lang));
+  return speakQueue;
+};
+
+export const speakSequence = (items: Array<{ text: string; lang?: string }>) => {
+  speakQueue = speakQueue.then(async () => {
+    for (const item of items) {
+      await speakOnce(item.text, item.lang);
+    }
+  });
+  return speakQueue;
+};
+
 export const initVoice = () => {
-  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-    window.speechSynthesis.getVoices();
-  }
+  if (typeof window === "undefined") return;
+  if (!("speechSynthesis" in window)) return;
+  window.speechSynthesis.getVoices();
 };

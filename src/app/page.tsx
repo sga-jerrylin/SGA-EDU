@@ -7,7 +7,7 @@ import { Terminal, ShieldCheck, Play, X, Atom } from "lucide-react";
 import MatrixRain from "@/components/MatrixRain";
 import GlitchText from "@/components/GlitchText";
 import HolographicLogo from "@/components/HolographicLogo";
-import { playBootSound, playClickSound, speak } from "@/lib/jarvis";
+import { initVoice, playBootSound, playClickSound, speakSequence, unlockAudio } from "@/lib/jarvis";
 
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
@@ -20,6 +20,13 @@ export default function LandingPage() {
 
   useEffect(() => {
     setMounted(true);
+    initVoice();
+
+    const onFirstTouch = () => {
+      unlockAudio();
+      window.removeEventListener("touchstart", onFirstTouch);
+    };
+    window.addEventListener("touchstart", onFirstTouch);
     
     // Alternating text effect
     const interval = setInterval(() => {
@@ -27,25 +34,27 @@ export default function LandingPage() {
       setHintText(prev => prev === "CLICK TO START" ? "点击开始" : "CLICK TO START");
     }, 2500);
     
-    return () => clearInterval(interval);
+    return () => {
+      window.removeEventListener("touchstart", onFirstTouch);
+      clearInterval(interval);
+    };
   }, []);
 
   const handleInit = () => {
-    unlockAudio(); // Force unlock again on direct click
+    unlockAudio();
     playBootSound();
     setInitialized(true);
     
-    // Start speaking immediately to bypass mobile browser restrictions
-    // Sequence: Show content -> Speak English -> Speak Chinese
-    speak("Welcome to S G A, and AI UNI, Genesis System. Please select your identity.");
+    speakSequence([
+      {
+        text: "Welcome to S G A, and AI UNI, Genesis System. Please select your identity.",
+        lang: "en-US",
+      },
+      { text: "欢迎来到 S G A 与 AI UNI 创世纪系统。请选择您的身份。", lang: "zh-CN" },
+    ]);
     
     setTimeout(() => {
         setShowContent(true);
-        
-        // Wait for English to finish (approx 5-6 seconds) then speak Chinese
-        setTimeout(() => {
-           speak("欢迎来到 S G A 与 AI UNI 创世纪系统。请选择您的身份。");
-        }, 4500); // Reduced delay slightly since we started speaking earlier
     }, 1000);
   };
 
