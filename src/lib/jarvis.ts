@@ -1,6 +1,31 @@
+// Global AudioContext to reuse and unlock on mobile
+let audioContext: AudioContext | null = null;
+
+const getAudioContext = () => {
+  if (!audioContext) {
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    audioContext = new AudioContext();
+  }
+  return audioContext;
+};
+
+// Explicitly unlock audio context on user interaction (Mobile Safari fix)
+export const unlockAudio = () => {
+  const ctx = getAudioContext();
+  if (ctx.state === 'suspended') {
+    ctx.resume();
+  }
+  // Create and play a silent buffer to fully unlock the engine
+  const buffer = ctx.createBuffer(1, 1, 22050);
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  source.connect(ctx.destination);
+  source.start(0);
+};
+
 export const playBootSound = () => {
-  const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-  const ctx = new AudioContext();
+  const ctx = getAudioContext();
+  unlockAudio(); // Ensure unlocked
   
   // Oscillator 1: Low frequency sweep
   const osc1 = ctx.createOscillator();
@@ -38,8 +63,8 @@ export const playBootSound = () => {
 };
 
 export const playClickSound = () => {
-  const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-  const ctx = new AudioContext();
+  const ctx = getAudioContext();
+  if (ctx.state === 'suspended') ctx.resume();
   
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();

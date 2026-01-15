@@ -31,6 +31,7 @@ export default function LandingPage() {
   }, []);
 
   const handleInit = () => {
+    unlockAudio(); // Force unlock again on direct click
     playBootSound();
     setInitialized(true);
     
