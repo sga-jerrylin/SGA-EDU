@@ -1,16 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ShieldCheck, Briefcase, TrendingUp, Users, CheckCircle, ArrowRight } from "lucide-react";
 
-export default function ParentPage() {
+function ParentForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const studentId = searchParams.get('student_id');
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState({
+    child_name: "",
     parent_role: "",
     parent_age_range: "",
     parent_education: "",
@@ -330,5 +331,13 @@ export default function ParentPage() {
         </footer>
       </div>
     </main>
+  );
+}
+
+export default function ParentPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#f8f9fa] text-slate-500">Loading...</div>}>
+      <ParentForm />
+    </Suspense>
   );
 }
