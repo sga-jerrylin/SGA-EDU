@@ -34,15 +34,17 @@ export default function LandingPage() {
     playBootSound();
     setInitialized(true);
     
+    // Start speaking immediately to bypass mobile browser restrictions
     // Sequence: Show content -> Speak English -> Speak Chinese
+    speak("Welcome to S G A, and AI UNI, Genesis System. Please select your identity.");
+    
     setTimeout(() => {
         setShowContent(true);
-        speak("Welcome to S G A, and AI UNI, Genesis System. Please select your identity.");
         
         // Wait for English to finish (approx 5-6 seconds) then speak Chinese
         setTimeout(() => {
            speak("欢迎来到 S G A 与 AI UNI 创世纪系统。请选择您的身份。");
-        }, 5500);
+        }, 4500); // Reduced delay slightly since we started speaking earlier
     }, 1000);
   };
 

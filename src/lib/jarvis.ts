@@ -81,3 +81,10 @@ export const speak = (text: string) => {
     window.speechSynthesis.speak(utterance);
   }
 };
+
+// Pre-load voices to ensure they are ready on mobile
+export const initVoice = () => {
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    window.speechSynthesis.getVoices();
+  }
+};
