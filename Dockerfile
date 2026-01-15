@@ -1,4 +1,6 @@
 FROM node:18-alpine AS base
+# Replace Alpine source with Tencent Cloud mirror for faster download in China
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tencent.com/g' /etc/apk/repositories
 
 # Install dependencies only when needed
 FROM base AS deps
