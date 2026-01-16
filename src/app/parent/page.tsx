@@ -47,6 +47,8 @@ function ParentForm() {
       });
       if (res.ok) {
         setStep(2); // Success step
+      } else {
+        alert("提交失败，服务器返回错误");
       }
     } catch (error) {
       console.error(error);
@@ -94,6 +96,17 @@ function ParentForm() {
               </div>
 
               <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-3">学员姓名（孩子）</label>
+                  <input
+                    type="text"
+                    value={formData.child_name}
+                    onChange={(e) => updateField("child_name", e.target.value)}
+                    placeholder="请输入孩子姓名"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 outline-none focus:bg-white focus:border-slate-900 transition-all text-base placeholder:text-slate-400"
+                  />
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-3">您是学员的？</label>
                   <div className="grid grid-cols-3 gap-3">

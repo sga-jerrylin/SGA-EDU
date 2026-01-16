@@ -147,13 +147,22 @@ export default function StudentPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs text-cyber-blue mb-2 uppercase tracking-widest">出生日期</label>
-                    <input 
-                      type="date" 
+                    <label className="block text-xs text-cyber-blue mb-2 uppercase tracking-widest">出生年代</label>
+                    <select 
                       value={formData.birthday}
                       onChange={(e) => updateField('birthday', e.target.value)}
                       className="w-full bg-gray-900 border border-cyber-blue/30 p-3 md:p-4 text-base rounded focus:border-cyber-blue outline-none appearance-none"
-                    />
+                    >
+                      <option value="">SELECT...</option>
+                      <option value="15后 (2015-2019)">15后 (Alpha世代 - 原住民)</option>
+                      <option value="10后 (2010-2014)">10后 (Alpha世代 - 崛起者)</option>
+                      <option value="05后 (2005-2009)">05后 (Z世代 - 破壁者)</option>
+                      <option value="00后 (2000-2004)">00后 (Z世代 - 创变者)</option>
+                      <option value="90后">90后 (千禧一代 - 经典款)</option>
+                      <option value="80后">80后 (黄金一代 - 传奇)</option>
+                      <option value="70后">70后 (中流砥柱 - 宗师)</option>
+                      <option value="60后">60后 (开拓者 - 传说)</option>
+                    </select>
                   </div>
                 </div>
 
