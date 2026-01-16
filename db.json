@@ -163,5 +163,31 @@
     "wechat": "wechat2",
     "school": "School 2",
     "grade": "高中"
+  },
+  {
+    "id": "3ffc4415-e75e-4e60-9e09-120581bd8e24",
+    "createdAt": "2026-01-16T08:31:08.974Z",
+    "updatedAt": "2026-01-16T08:31:08.974Z",
+    "role_archetype": "Marketing_Bard",
+    "tech_score": 100,
+    "leadership_style": "D",
+    "preferred_track": "SaaS",
+    "student_name": "Cloud Test",
+    "gender": "男",
+    "birthday": "2011",
+    "wechat_id": "cloudwechat",
+    "phone_number": "999",
+    "school_name": "Cloud School",
+    "grade_level": "初中",
+    "talent_point": "C",
+    "crisis_reaction": "C",
+    "weapon_choice": "D",
+    "logic_test": "C",
+    "loot_distribution": "D",
+    "time_commitment": "A",
+    "phone": "999",
+    "wechat": "cloudwechat",
+    "school": "Cloud School",
+    "grade": "初中"
   }
 ]

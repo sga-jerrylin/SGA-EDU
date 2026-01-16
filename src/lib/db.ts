@@ -54,20 +54,8 @@ export interface Submission {
 }
 
 function getDb(): Submission[] {
-  console.log('Database path:', DB_PATH);
-  try {
-    if (fs.existsSync(DB_PATH)) {
-      const data = fs.readFileSync(DB_PATH, 'utf-8');
-      if (!data.trim()) {
-        console.log('Database file is empty, re-initializing.');
-        fs.writeFileSync(DB_PATH, JSON.stringify([]));
-        return [];
-      }
-      return JSON.parse(data);
-    }
-  } catch (error) {
-    console.error('Error accessing primary database:', error);
-  }
+  console.log('Database primary path:', DB_PATH);
+  console.log('Database fallback path:', FALLBACK_DB_PATH);
 
   try {
     if (fs.existsSync(FALLBACK_DB_PATH)) {
@@ -81,6 +69,20 @@ function getDb(): Submission[] {
     }
   } catch (error) {
     console.error('Error accessing fallback database:', error);
+  }
+
+  try {
+    if (fs.existsSync(DB_PATH)) {
+      const data = fs.readFileSync(DB_PATH, 'utf-8');
+      if (!data.trim()) {
+        console.log('Database file is empty, re-initializing.');
+        fs.writeFileSync(DB_PATH, JSON.stringify([]));
+        return [];
+      }
+      return JSON.parse(data);
+    }
+  } catch (error) {
+    console.error('Error accessing primary database:', error);
   }
 
   try {
