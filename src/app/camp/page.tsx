@@ -56,7 +56,7 @@ export default function CampPage() {
             viewport={{ once: true }}
             className="mb-16 text-center"
           >
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 text-cyber-blue">拒绝"玩具"，只做"产品"</h2>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6 text-cyber-blue">拒绝&ldquo;玩具&rdquo;，只做&ldquo;产品&rdquo;</h2>
             <p className="text-gray-400 text-lg max-w-3xl mx-auto">
               在这个AI重新定义一切的时代，你是选择做被算法喂养的消费者，还是做驾驭算法的创造者？
             </p>
@@ -109,7 +109,7 @@ export default function CampPage() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-cyber-pink/10 blur-[100px] rounded-full"></div>
             
             <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-white relative z-10">
-              "3+1" 硬核进阶模式
+              &ldquo;3+1&rdquo; 硬核进阶模式
             </h2>
 
             <div className="space-y-12 relative z-10">
@@ -159,7 +159,7 @@ export default function CampPage() {
             <div className="bg-white p-6 rounded-2xl max-w-sm mx-auto w-full shadow-[0_0_30px_rgba(0,243,255,0.15)]">
                <div className="aspect-square relative w-full mb-4 bg-gray-100 flex items-center justify-center rounded-xl overflow-hidden">
                  {/* Replace with actual QR Code image path if available in public folder */}
-                 <img src="/0.png" alt="Payment QR Code" className="w-full h-full object-contain" />
+                 <Image src="/0.png" alt="Payment QR Code" width={400} height={400} className="w-full h-full object-contain" />
                </div>
                <p className="text-black font-bold text-lg">扫码支付锁定名额</p>
                <p className="text-gray-500 text-sm mt-2">支持微信支付 / 信用卡</p>
