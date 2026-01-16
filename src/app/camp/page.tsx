@@ -214,8 +214,7 @@ export default function CampPage() {
             {/* Payment QR */}
             <div className="bg-white p-6 rounded-2xl max-w-sm mx-auto w-full shadow-[0_0_30px_rgba(0,243,255,0.15)]">
                <div className="aspect-square relative w-full mb-4 bg-gray-100 flex items-center justify-center rounded-xl overflow-hidden">
-                 {/* Replace with actual QR Code image path if available in public folder */}
-                 <Image src="/payment-qr.png" alt="Payment QR Code" width={400} height={400} className="w-full h-full object-contain" />
+                 <img src="/payment-qr.png" alt="Payment QR Code" className="w-full h-full object-contain" />
                </div>
                <p className="text-black font-bold text-lg">扫码支付锁定名额</p>
                <p className="text-gray-500 text-sm mt-2">支持微信支付 / 信用卡</p>

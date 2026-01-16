@@ -50,8 +50,11 @@ export default function StudentPage() {
         body: JSON.stringify({ type: 'student', ...formData })
       });
       const data = await res.json();
-      if (res.ok) {
-        setStep(4); // Go to completion step
+      if (res.ok && data?.success) {
+        setStep(4);
+      } else {
+        console.error("Student submit failed", data);
+        alert("提交失败，服务器返回错误");
       }
     } catch (error) {
       console.error(error);

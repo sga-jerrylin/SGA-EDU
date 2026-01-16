@@ -3,6 +3,7 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
 const DB_PATH = path.join(process.cwd(), 'db.json');
+const FALLBACK_DB_PATH = path.join(process.cwd(), '.next', 'db.json');
 
 export interface Submission {
   id: string;
@@ -39,6 +40,15 @@ export interface Submission {
   is_hot_lead?: boolean;
   success_goal?: string;
 
+  fpa_name?: string;
+  fpa_age?: string;
+  fpa_gender?: string;
+  fpa_score_yellow?: number;
+  fpa_score_red?: number;
+  fpa_score_blue?: number;
+  fpa_score_green?: number;
+  fpa_dominant_type?: number;
+
   createdAt: string;
   updatedAt: string;
 }
@@ -46,26 +56,66 @@ export interface Submission {
 function getDb(): Submission[] {
   console.log('Database path:', DB_PATH);
   try {
-    if (!fs.existsSync(DB_PATH)) {
-      console.log('Database file does not exist, creating new one.');
-      fs.writeFileSync(DB_PATH, JSON.stringify([]));
-      return [];
+    if (fs.existsSync(DB_PATH)) {
+      const data = fs.readFileSync(DB_PATH, 'utf-8');
+      if (!data.trim()) {
+        console.log('Database file is empty, re-initializing.');
+        fs.writeFileSync(DB_PATH, JSON.stringify([]));
+        return [];
+      }
+      return JSON.parse(data);
     }
-    const data = fs.readFileSync(DB_PATH, 'utf-8');
-    if (!data.trim()) {
-      console.log('Database file is empty, re-initializing.');
-      fs.writeFileSync(DB_PATH, JSON.stringify([]));
-      return [];
-    }
-    return JSON.parse(data);
   } catch (error) {
-    console.error('Error accessing database:', error);
-    return [];
+    console.error('Error accessing primary database:', error);
   }
+
+  try {
+    if (fs.existsSync(FALLBACK_DB_PATH)) {
+      const data = fs.readFileSync(FALLBACK_DB_PATH, 'utf-8');
+      if (!data.trim()) {
+        console.log('Fallback database file is empty, re-initializing.');
+        fs.writeFileSync(FALLBACK_DB_PATH, JSON.stringify([]));
+        return [];
+      }
+      return JSON.parse(data);
+    }
+  } catch (error) {
+    console.error('Error accessing fallback database:', error);
+  }
+
+  try {
+    fs.writeFileSync(DB_PATH, JSON.stringify([]));
+  } catch (error) {
+    console.error('Error creating primary database, trying fallback:', error);
+    try {
+      const dir = path.dirname(FALLBACK_DB_PATH);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(FALLBACK_DB_PATH, JSON.stringify([]));
+    } catch (fallbackError) {
+      console.error('Error creating fallback database:', fallbackError);
+    }
+  }
+
+  return [];
 }
 
 function saveDb(data: Submission[]) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
+  try {
+    fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
+  } catch (error) {
+    console.error('Error saving primary database, trying fallback:', error);
+    try {
+      const dir = path.dirname(FALLBACK_DB_PATH);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(FALLBACK_DB_PATH, JSON.stringify(data, null, 2));
+    } catch (fallbackError) {
+      console.error('Error saving fallback database:', fallbackError);
+    }
+  }
 }
 
 export const db = {
@@ -103,6 +153,14 @@ export const db = {
       db[index] = updatedSubmission;
       saveDb(db);
       return updatedSubmission;
+    },
+    delete: async (id: string) => {
+      const db = getDb();
+      const index = db.findIndex(s => s.id === id);
+      if (index === -1) return false;
+      db.splice(index, 1);
+      saveDb(db);
+      return true;
     }
   }
 };

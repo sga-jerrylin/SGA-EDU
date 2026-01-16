@@ -38,6 +38,29 @@ export default function AdminPage() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    const confirmed = window.confirm("确认删除该记录？删除后统计会自动更新。");
+    if (!confirmed) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/admin?id=${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        console.error("Failed to delete submission");
+        return;
+      }
+      if (selectedStudent && selectedStudent.id === id) {
+        setSelectedStudent(null);
+      }
+      await fetchData();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (isLoggedIn) {
       fetchData();
@@ -176,7 +199,7 @@ export default function AdminPage() {
                 {filtered.map((s) => (
                   <tr key={s.id} className="hover:bg-slate-50/80 transition-colors group">
                     <td className="px-6 py-4">
-                      <div className="font-bold text-slate-900 text-base">{s.student_name || "未知"}</div>
+                      <div className="font-bold text-slate-900 text-base">{s.student_name || s.fpa_name || "未知"}</div>
                       <div className="text-xs text-slate-500 mt-0.5">{s.phone}</div>
                       <div className="text-xs text-slate-500 mt-0.5">{s.school} ({s.grade})</div>
                     </td>
@@ -212,12 +235,18 @@ export default function AdminPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                       <button 
+                      <button 
                         onClick={() => setSelectedStudent(s)}
                         className="text-blue-600 hover:text-blue-800 font-medium text-xs border border-blue-200 hover:bg-blue-50 px-3 py-1.5 rounded transition-colors"
-                       >
-                         查看详情
-                       </button>
+                      >
+                        查看详情
+                      </button>
+                      <button
+                        onClick={() => handleDelete(s.id)}
+                        className="ml-2 text-red-600 hover:text-red-800 font-medium text-xs border border-red-200 hover:bg-red-50 px-3 py-1.5 rounded transition-colors"
+                      >
+                        删除
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -274,8 +303,8 @@ export default function AdminPage() {
                     <div><span className="text-slate-500">出生日期:</span> {selectedStudent.birthday}</div>
                     <div><span className="text-slate-500">学校:</span> {selectedStudent.school}</div>
                     <div><span className="text-slate-500">年级:</span> {selectedStudent.grade}</div>
-                    <div><span className="text-slate-500">微信:</span> {selectedStudent.wechat_id}</div>
-                    <div><span className="text-slate-500">手机:</span> {selectedStudent.phone_number}</div>
+                    <div><span className="text-slate-500">微信:</span> {selectedStudent.wechat}</div>
+                    <div><span className="text-slate-500">手机:</span> {selectedStudent.phone}</div>
                   </div>
                 </section>
 
@@ -354,6 +383,56 @@ export default function AdminPage() {
                     </div>
                   </div>
                 </section>
+
+                {(selectedStudent.fpa_name ||
+                  selectedStudent.fpa_score_yellow != null ||
+                  selectedStudent.fpa_score_red != null ||
+                  selectedStudent.fpa_score_blue != null ||
+                  selectedStudent.fpa_score_green != null) && (
+                  <section>
+                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 border-b pb-2 flex items-center gap-2">
+                      <Shield size={16} className="text-green-500" /> FPA 测试结果
+                    </h3>
+                    <div className="grid grid-cols-1 gap-3 text-sm">
+                      <div className="grid grid-cols-3 gap-3">
+                        <div>
+                          <span className="text-slate-500 block text-xs mb-1">姓名:</span>
+                          {selectedStudent.fpa_name}
+                        </div>
+                        <div>
+                          <span className="text-slate-500 block text-xs mb-1">年龄:</span>
+                          {selectedStudent.fpa_age}
+                        </div>
+                        <div>
+                          <span className="text-slate-500 block text-xs mb-1">性别:</span>
+                          {selectedStudent.fpa_gender}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-yellow-50 p-3 rounded border border-yellow-100">
+                          <span className="text-xs text-yellow-700 block mb-1">黄色:</span>
+                          <span className="font-bold text-yellow-800">{selectedStudent.fpa_score_yellow}</span>
+                        </div>
+                        <div className="bg-red-50 p-3 rounded border border-red-100">
+                          <span className="text-xs text-red-700 block mb-1">红色:</span>
+                          <span className="font-bold text-red-800">{selectedStudent.fpa_score_red}</span>
+                        </div>
+                        <div className="bg-blue-50 p-3 rounded border border-blue-100">
+                          <span className="text-xs text-blue-700 block mb-1">蓝色:</span>
+                          <span className="font-bold text-blue-800">{selectedStudent.fpa_score_blue}</span>
+                        </div>
+                        <div className="bg-green-50 p-3 rounded border border-green-100">
+                          <span className="text-xs text-green-700 block mb-1">绿色:</span>
+                          <span className="font-bold text-green-800">{selectedStudent.fpa_score_green}</span>
+                        </div>
+                      </div>
+                      <div className="bg-slate-50 p-3 rounded">
+                        <span className="text-slate-500 block text-xs mb-1">主导类型:</span>
+                        {selectedStudent.fpa_dominant_type}
+                      </div>
+                    </div>
+                  </section>
+                )}
               </div>
             </motion.div>
           </motion.div>
