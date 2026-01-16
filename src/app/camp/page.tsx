@@ -138,15 +138,71 @@ export default function CampPage() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold mb-3 text-white">创造与发布</h3>
-                  <p className="text-gray-400">
+                  <p className="text-gray-400 mb-6">
                     直接对标硅谷前沿 AI Engineer 标准。从零打造一款真正上线的 AI 产品。
                     最终在产品发布会上路演。
                   </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300 bg-gray-900/50 p-4 rounded-lg border border-gray-800">
+                     <div>
+                        <span className="text-cyber-pink font-bold block mb-1">Day 1-2:</span> 
+                        <span className="text-gray-400">MVP构建与原型验证</span>
+                     </div>
+                     <div>
+                        <span className="text-cyber-pink font-bold block mb-1">Day 3-4:</span> 
+                        <span className="text-gray-400">产品迭代与增长黑客</span>
+                     </div>
+                     <div className="col-span-1 md:col-span-2">
+                        <span className="text-cyber-pink font-bold block mb-1">Day 5:</span> 
+                        <span className="text-white">产品发布会 (Demo Day) + 路演</span>
+                     </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Tutors & FAQ */}
+      <section className="py-20 px-4 md:px-12 relative z-10 bg-black/80">
+         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16">
+            <div>
+               <h2 className="text-3xl font-bold mb-8 text-white">先人一步的 SGA 方法论</h2>
+               <div className="space-y-6">
+                  {[
+                     { title: "Sourcing (资源整合)", desc: "不仅仅是写代码，更是学会如何调用全球最顶尖的 API 和模型能力。" },
+                     { title: "Leverage (AI杠杆)", desc: "一个人就是一支队伍。学会用 AI 放大你的创造力，实现指数级产出。" },
+                     { title: "Speed (唯快不破)", desc: "天下武功，唯快不破。在 AI 时代，速度就是最大的护城河。" }
+                  ].map((item, i) => (
+                     <div key={i} className="flex gap-4">
+                        <div className="w-1 h-full bg-cyber-blue rounded-full"></div>
+                        <div>
+                           <h4 className="text-lg font-bold text-cyber-blue mb-1">{item.title}</h4>
+                           <p className="text-gray-400 text-sm">{item.desc}</p>
+                        </div>
+                     </div>
+                  ))}
+               </div>
+            </div>
+
+            <div>
+               <h2 className="text-3xl font-bold mb-8 text-white">常见问题 (FAQ)</h2>
+               <div className="space-y-4">
+                  {[
+                     { q: "需要编程基础吗？", a: "不需要。我们使用最新的 AI 辅助编程工具 (Vibe Coding)，只要你有逻辑思维，就能创造产品。" },
+                     { q: "适合多大的孩子？", a: "建议 12-18 岁。我们需要你不甘平庸，拥有一颗不安分的灵魂。" },
+                     { q: "线上课程怎么上？", a: "直播 + 录播 + 实时答疑。不是枯燥的网课，而是实战任务驱动的闯关游戏。" }
+                  ].map((faq, i) => (
+                     <div key={i} className="bg-gray-900/30 p-4 rounded-lg border border-gray-800">
+                        <h4 className="text-white font-bold mb-2 flex items-center gap-2">
+                           <span className="text-cyber-pink">Q.</span> {faq.q}
+                        </h4>
+                        <p className="text-gray-400 text-sm pl-6">{faq.a}</p>
+                     </div>
+                  ))}
+               </div>
+            </div>
+         </div>
       </section>
 
       {/* Registration & Payment */}
@@ -159,7 +215,7 @@ export default function CampPage() {
             <div className="bg-white p-6 rounded-2xl max-w-sm mx-auto w-full shadow-[0_0_30px_rgba(0,243,255,0.15)]">
                <div className="aspect-square relative w-full mb-4 bg-gray-100 flex items-center justify-center rounded-xl overflow-hidden">
                  {/* Replace with actual QR Code image path if available in public folder */}
-                 <Image src="/0.png" alt="Payment QR Code" width={400} height={400} className="w-full h-full object-contain" />
+                 <Image src="/payment-qr.png" alt="Payment QR Code" width={400} height={400} className="w-full h-full object-contain" />
                </div>
                <p className="text-black font-bold text-lg">扫码支付锁定名额</p>
                <p className="text-gray-500 text-sm mt-2">支持微信支付 / 信用卡</p>
