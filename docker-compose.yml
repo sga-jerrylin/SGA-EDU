@@ -1,5 +1,6 @@
 services:
   web:
+    build: .
     image: jerrylinsga/sga-winter-camp:latest
     container_name: sga-winter-camp
     restart: always
