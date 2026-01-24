@@ -26,8 +26,15 @@ export async function POST(request: Request) {
     let submission;
 
     if (type === 'student') {
+      const now = new Date().toISOString();
       const studentProfile = processStudentData(payload);
       if (existing) {
+        const task_progress = existing.task_progress && Object.keys(existing.task_progress).length > 0
+          ? existing.task_progress
+          : Object.fromEntries(Array.from({ length: 8 }, (_, i) => {
+              const id = i + 1;
+              return [id, { status: id === 1 ? 'unlocked' : 'locked', ...(id === 1 ? { unlocked_at: now } : {}) }];
+            }));
         // Update existing (though usually student comes first)
         submission = await db.submission.update(existing.id, {
           ...studentProfile,
@@ -36,6 +43,8 @@ export async function POST(request: Request) {
           wechat: payload.wechat_id,
           school: payload.school_name,
           grade: payload.grade_level,
+          task_progress,
+          mission_started_at: existing.mission_started_at || now
         });
       } else {
         submission = await db.submission.create({
@@ -46,6 +55,11 @@ export async function POST(request: Request) {
           wechat: payload.wechat_id,
           school: payload.school_name,
           grade: payload.grade_level,
+          task_progress: Object.fromEntries(Array.from({ length: 8 }, (_, i) => {
+            const id = i + 1;
+            return [id, { status: id === 1 ? 'unlocked' : 'locked', ...(id === 1 ? { unlocked_at: now } : {}) }];
+          })),
+          mission_started_at: now
         });
       }
     } else if (type === 'parent') {

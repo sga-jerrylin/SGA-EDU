@@ -104,3 +104,67 @@ body {
 .animate-scan-fast {
   animation: scan-fast 1.5s linear infinite;
 }
+
+/* Sci-Fi HUD Utilities */
+.hud-clip-top-left {
+  clip-path: polygon(20px 0, 100% 0, 100% 100%, 0 100%, 0 20px);
+}
+.hud-clip-corners {
+  clip-path: polygon(
+    20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 
+    0 100%, 0 20px
+  );
+}
+.hud-panel-glow {
+  box-shadow: 0 0 20px rgba(0, 243, 255, 0.15), inset 0 0 20px rgba(0, 243, 255, 0.05);
+  border: 1px solid rgba(0, 243, 255, 0.3);
+}
+.hud-text-glow {
+  text-shadow: 0 0 5px rgba(0, 243, 255, 0.8);
+}
+.hud-border-strong {
+  border: 2px solid #00f3ff;
+  box-shadow: 0 0 15px rgba(0, 243, 255, 0.5);
+}
+
+/* Iron Man HUD Animations */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes spin-reverse-slow {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { opacity: 0.5; }
+  100% { transform: scale(1.2); opacity: 0; }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 10s linear infinite;
+}
+.animate-spin-slower {
+  animation: spin-slow 20s linear infinite;
+}
+.animate-reverse-spin {
+  animation: spin-reverse-slow 15s linear infinite;
+}
+.animate-pulse-ring {
+  animation: pulse-ring 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 243, 255, 0.1);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 243, 255, 0.5);
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 243, 255, 0.8);
+}

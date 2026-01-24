@@ -1,68 +1,27 @@
-"use client";
+import { Atom, Zap } from "lucide-react";
 
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-
-interface HolographicLogoProps {
-  text: string;
-  color?: "blue" | "pink";
-  className?: string;
-}
-
-export default function HolographicLogo({ text, color = "blue", className = "" }: HolographicLogoProps) {
-  const [isHovered, setIsHovered] = useState(false);
-  
-  // Color configuration
-  const mainColor = color === "blue" ? "text-cyber-blue" : "text-cyber-pink";
-  const shadowColor = color === "blue" ? "#00f3ff" : "#ff00ff";
-  
+export default function HolographicLogo() {
   return (
-    <div 
-      className={`relative inline-block group ${className}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Base Text */}
-      <h1 className={`relative z-10 font-black tracking-tighter ${mainColor} mix-blend-screen`}>
-        {text}
-        
-        {/* Scan line effect */}
-        <span className="absolute inset-0 w-full h-full bg-gradient-to-b from-transparent via-white/50 to-transparent opacity-0 group-hover:opacity-30 animate-scan-fast pointer-events-none"></span>
-      </h1>
-
-      {/* Glitch Layer 1 - Cyan/Red Offset */}
-      <motion.h1 
-        className={`absolute top-0 left-0 -z-10 font-black tracking-tighter text-red-500 opacity-70 mix-blend-screen select-none`}
-        animate={{ 
-          x: isHovered ? [-2, 2, -1, 0] : 0,
-          opacity: isHovered ? [0.5, 0.8, 0.5] : 0
-        }}
-        transition={{ duration: 0.2, repeat: Infinity, repeatType: "mirror" }}
-      >
-        {text}
-      </motion.h1>
-
-      {/* Glitch Layer 2 - Blue/Green Offset */}
-      <motion.h1 
-        className={`absolute top-0 left-0 -z-10 font-black tracking-tighter text-blue-500 opacity-70 mix-blend-screen select-none`}
-        animate={{ 
-          x: isHovered ? [2, -2, 1, 0] : 0,
-          opacity: isHovered ? [0.5, 0.8, 0.5] : 0
-        }}
-        transition={{ duration: 0.3, repeat: Infinity, repeatType: "mirror" }}
-      >
-        {text}
-      </motion.h1>
-
-      {/* Glow Halo */}
-      <div 
-        className={`absolute inset-0 blur-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-500 -z-20`}
-        style={{ backgroundColor: shadowColor }}
-      ></div>
+    <div className="relative w-32 h-32 mx-auto mb-6 flex items-center justify-center">
+      {/* Outer Rotating Rings */}
+      <div className="absolute inset-0 border-2 border-cyber-blue/30 rounded-full animate-[spin_10s_linear_infinite]" />
+      <div className="absolute inset-2 border border-cyber-blue/20 rounded-full animate-[spin_8s_linear_infinite_reverse]" />
+      <div className="absolute inset-4 border border-dashed border-cyber-blue/40 rounded-full animate-[spin_12s_linear_infinite]" />
       
-      {/* Tech Decorations */}
-      <div className="absolute -top-2 -right-2 w-2 h-2 border-t-2 border-r-2 border-white/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-      <div className="absolute -bottom-2 -left-2 w-2 h-2 border-b-2 border-l-2 border-white/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+      {/* Core Glow */}
+      <div className="absolute inset-0 bg-cyber-blue/10 rounded-full blur-xl animate-pulse" />
+      
+      {/* Text Logo */}
+      <div className="relative z-10 flex flex-col items-center justify-center">
+        <div className="flex items-center gap-1 text-3xl font-black italic tracking-tighter text-white drop-shadow-[0_0_10px_rgba(0,243,255,0.8)]">
+          <span>SGA</span>
+          <span className="text-cyber-blue">
+             <Atom size={24} className="animate-spin" />
+          </span>
+          <span>AIUNI</span>
+        </div>
+        <div className="text-[0.5rem] tracking-[0.4em] text-cyber-blue mt-1 uppercase">Genesis System</div>
+      </div>
     </div>
   );
 }

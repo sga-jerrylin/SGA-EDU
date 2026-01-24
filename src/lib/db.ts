@@ -49,33 +49,32 @@ export interface Submission {
   fpa_score_green?: number;
   fpa_dominant_type?: number;
 
+  // User Profile & Tasks
+  password?: string;
+  avatar_url?: string;
+  mission_started_at?: string;
+  mission_completed_at?: string;
+  task_progress?: {
+    [key: string]: {
+      status: 'locked' | 'unlocked' | 'completed';
+      screenshot_url?: string;
+      unlocked_at?: string;
+      completed_at?: string;
+    }
+  };
+
   createdAt: string;
   updatedAt: string;
 }
 
 function getDb(): Submission[] {
-  console.log('Database primary path:', DB_PATH);
-  console.log('Database fallback path:', FALLBACK_DB_PATH);
-
-  try {
-    if (fs.existsSync(FALLBACK_DB_PATH)) {
-      const data = fs.readFileSync(FALLBACK_DB_PATH, 'utf-8');
-      if (!data.trim()) {
-        console.log('Fallback database file is empty, re-initializing.');
-        fs.writeFileSync(FALLBACK_DB_PATH, JSON.stringify([]));
-        return [];
-      }
-      return JSON.parse(data);
-    }
-  } catch (error) {
-    console.error('Error accessing fallback database:', error);
-  }
-
+  // Always prefer the primary DB path for consistency
+  // If we found a split brain situation (both exist), we prioritize DB_PATH and maybe should warn/sync
+  
   try {
     if (fs.existsSync(DB_PATH)) {
       const data = fs.readFileSync(DB_PATH, 'utf-8');
       if (!data.trim()) {
-        console.log('Database file is empty, re-initializing.');
         fs.writeFileSync(DB_PATH, JSON.stringify([]));
         return [];
       }
@@ -85,38 +84,49 @@ function getDb(): Submission[] {
     console.error('Error accessing primary database:', error);
   }
 
+  // Only check fallback if primary doesn't exist
+  try {
+    if (fs.existsSync(FALLBACK_DB_PATH)) {
+      const data = fs.readFileSync(FALLBACK_DB_PATH, 'utf-8');
+      if (!data.trim()) {
+        return [];
+      }
+      return JSON.parse(data);
+    }
+  } catch (error) {
+    console.error('Error accessing fallback database:', error);
+  }
+
+  // Initialize primary if nothing exists
   try {
     fs.writeFileSync(DB_PATH, JSON.stringify([]));
   } catch (error) {
-    console.error('Error creating primary database, trying fallback:', error);
-    try {
-      const dir = path.dirname(FALLBACK_DB_PATH);
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-      fs.writeFileSync(FALLBACK_DB_PATH, JSON.stringify([]));
-    } catch (fallbackError) {
-      console.error('Error creating fallback database:', fallbackError);
-    }
+    console.error('Error creating primary database:', error);
   }
 
   return [];
 }
 
 function saveDb(data: Submission[]) {
+  // We should try to save to BOTH to keep them in sync if they both exist, 
+  // or just save to the one we are using. 
+  // For simplicity and robustness, we write to DB_PATH. 
+  // If FALLBACK exists, we update it too to prevent stale reads if we switch back.
+  
   try {
     fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
   } catch (error) {
-    console.error('Error saving primary database, trying fallback:', error);
-    try {
-      const dir = path.dirname(FALLBACK_DB_PATH);
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-      fs.writeFileSync(FALLBACK_DB_PATH, JSON.stringify(data, null, 2));
-    } catch (fallbackError) {
-      console.error('Error saving fallback database:', fallbackError);
+    console.error('Error saving primary database:', error);
+  }
+
+  try {
+    // Also sync fallback if the directory exists, to avoid confusion
+    const dir = path.dirname(FALLBACK_DB_PATH);
+    if (fs.existsSync(dir)) {
+        fs.writeFileSync(FALLBACK_DB_PATH, JSON.stringify(data, null, 2));
     }
+  } catch (error) {
+    // Ignore fallback errors
   }
 }
 

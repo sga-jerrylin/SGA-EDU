@@ -15,6 +15,48 @@ export default function AdminPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
 
+  const formatDateTime = (value?: string) => {
+    if (!value) return "—";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "—";
+    return d.toLocaleString();
+  };
+
+  const formatDuration = (start?: string, end?: string) => {
+    if (!start || !end) return "—";
+    const s = new Date(start).getTime();
+    const e = new Date(end).getTime();
+    if (Number.isNaN(s) || Number.isNaN(e) || e < s) return "—";
+    const totalSeconds = Math.floor((e - s) / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  };
+
+  const getLastCompletedAt = (progress?: Record<string, any>) => {
+    if (!progress) return undefined;
+    const times = Object.values(progress)
+      .map((t: any) => t?.completed_at)
+      .filter(Boolean)
+      .map((t: string) => new Date(t).getTime())
+      .filter((t: number) => !Number.isNaN(t));
+    if (times.length === 0) return undefined;
+    return new Date(Math.max(...times)).toISOString();
+  };
+
+  const getFirstCompletedAt = (progress?: Record<string, any>) => {
+    if (!progress) return undefined;
+    const times = Object.values(progress)
+      .map((t: any) => t?.completed_at)
+      .filter(Boolean)
+      .map((t: string) => new Date(t).getTime())
+      .filter((t: number) => !Number.isNaN(t));
+    if (times.length === 0) return undefined;
+    return new Date(Math.min(...times)).toISOString();
+  };
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (username === "sga" && password === "aiuni") {
@@ -346,6 +388,51 @@ export default function AdminPage() {
                         {selectedStudent.time_commitment}
                       </div>
                     </div>
+                  </div>
+                </section>
+
+                <section>
+                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 border-b pb-2 flex items-center gap-2">
+                    <Shield size={16} className="text-green-500" /> 任务进度与耗时
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3 text-sm mb-4">
+                    <div className="bg-slate-50 p-3 rounded">
+                      <span className="text-slate-500 block text-xs mb-1">任务开始时间:</span>
+                      {formatDateTime(
+                        selectedStudent.mission_started_at ||
+                        selectedStudent.task_progress?.[1]?.unlocked_at ||
+                        getFirstCompletedAt(selectedStudent.task_progress)
+                      )}
+                    </div>
+                    <div className="bg-slate-50 p-3 rounded">
+                      <span className="text-slate-500 block text-xs mb-1">任务结束时间:</span>
+                      {formatDateTime(
+                        selectedStudent.mission_completed_at ||
+                        getLastCompletedAt(selectedStudent.task_progress)
+                      )}
+                    </div>
+                    <div className="bg-slate-50 p-3 rounded">
+                      <span className="text-slate-500 block text-xs mb-1">总耗时:</span>
+                      {formatDuration(
+                        selectedStudent.mission_started_at ||
+                          selectedStudent.task_progress?.[1]?.unlocked_at ||
+                          getFirstCompletedAt(selectedStudent.task_progress),
+                        selectedStudent.mission_completed_at ||
+                          getLastCompletedAt(selectedStudent.task_progress)
+                      )}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-2 text-sm">
+                    {Array.from({ length: 8 }, (_, i) => {
+                      const id = i + 1;
+                      const progress = selectedStudent.task_progress?.[id];
+                      return (
+                        <div key={id} className="bg-slate-50 p-3 rounded flex items-center justify-between">
+                          <span className="text-slate-700 font-medium">任务 {id}</span>
+                          <span className="text-slate-500">{formatDateTime(progress?.completed_at)}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </section>
 
